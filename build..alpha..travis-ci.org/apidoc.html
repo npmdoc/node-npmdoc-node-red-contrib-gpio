@@ -1,0 +1,634 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+        href="https://github.com/monteslu/node-red-contrib-gpio"
+
+    >node-red-contrib-gpio (v0.9.2)</a>
+</h1>
+<h4>A set of node-red nodes for using johnny-five and IO plugins</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.node-red-contrib-gpio">module node-red-contrib-gpio</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.node-red-contrib-gpio.node-red-contrib-gpio">
+            function <span class="apidocSignatureSpan"></span>node-red-contrib-gpio
+            <span class="apidocSignatureSpan">(RED)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.node-red-contrib-gpio.nodebotNode">
+            function <span class="apidocSignatureSpan">node-red-contrib-gpio.</span>nodebotNode
+            <span class="apidocSignatureSpan">(RED)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.node-red-contrib-gpio.toString">
+            function <span class="apidocSignatureSpan">node-red-contrib-gpio.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.node-red-contrib-gpio.nodebotNode">module node-red-contrib-gpio.nodebotNode</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.node-red-contrib-gpio.nodebotNode.nodebotNode">
+            function <span class="apidocSignatureSpan">node-red-contrib-gpio.</span>nodebotNode
+            <span class="apidocSignatureSpan">(RED)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.node-red-contrib-gpio.toString">module node-red-contrib-gpio.toString</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.node-red-contrib-gpio.toString.toString">
+            function <span class="apidocSignatureSpan">node-red-contrib-gpio.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.node-red-contrib-gpio" id="apidoc.module.node-red-contrib-gpio">module node-red-contrib-gpio</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.node-red-contrib-gpio.node-red-contrib-gpio" id="apidoc.element.node-red-contrib-gpio.node-red-contrib-gpio">
+        function <span class="apidocSignatureSpan"></span>node-red-contrib-gpio
+        <span class="apidocSignatureSpan">(RED)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function init(RED) {
+
+  createNodebotNode(RED);
+
+  function gpioInNode(n) {
+    RED.nodes.createNode(this,n);
+    this.buttonState = -1;
+    this.pin = n.pin;
+    this.state = n.state;
+    this.nodebot = RED.nodes.getNode(n.board);
+    if (typeof this.nodebot === &#x22;object&#x22;) {
+
+      var node = this;
+      connectingStatus(node);
+
+      node.nodebot.on(&#x27;ioready&#x27;, function() {
+        var io = node.nodebot.io;
+
+        connectedStatus(node);
+        if (node.state == &#x22;ANALOG&#x22;) {
+          var samplingInterval = parseInt(n.samplingInterval, 10) || 300;
+          try{io.setSamplingInterval(samplingInterval);}catch(exp){ console.log(exp); }
+          try{io.pinMode(node.pin, io.MODES.ANALOG);}catch(exp){ console.log(exp); }
+          io.analogRead(node.pin, function(data) {
+            var msg = {payload:data, topic:node.pin};
+            node.send(msg);
+          });
+        }
+        else {
+          try{io.pinMode(node.pin, io.MODES.INPUT);}catch(exp){ console.log(exp); }
+            io.digitalRead(node.pin, function(data) {
+            var msg = {payload:data, topic:node.pin};
+            node.send(msg);
+          });
+        }
+      });
+      node.nodebot.on(&#x27;networkReady&#x27;, function(){
+        networkReadyStatus(node);
+      });
+      node.nodebot.on(&#x27;networkError&#x27;, function(){
+        networkErrorStatus(node);
+      });
+      node.nodebot.on(&#x27;ioError&#x27;, function(err){
+        ioErrorStatus(node, err);
+      });
+    }
+    else {
+      this.warn(&#x22;nodebot not configured&#x22;);
+    }
+  }
+  RED.nodes.registerType(&#x22;gpio in&#x22;,gpioInNode);
+
+  function gpioOutNode(n) {
+    RED.nodes.createNode(this,n);
+    this.buttonState = -1;
+    this.pin = n.pin;
+    this.state = n.state;
+    this.arduino = n.arduino;
+    this.nodebot = RED.nodes.getNode(n.board);
+    this.i2cAddress = parseInt(n.i2cAddress, 10);
+    this.i2cRegister = parseInt(n.i2cRegister, 10);
+    if (typeof this.nodebot === &#x22;object&#x22;) {
+        var node = this;
+        connectingStatus(node);
+
+        node.nodebot.on(&#x27;ioready&#x27;, function() {
+
+            connectedStatus(node);
+
+            node.on(&#x27;input&#x27;, function(msg) {
+              try{
+                var state = msg.state || node.state;
+                var io = node.nodebot.io;
+                if (state === &#x27;OUTPUT&#x27;) {
+                  try{io.pinMode(node.pin, io.MODES[state]);}catch(exp){ console.log(exp); }
+                  if ((msg.payload == true)||(msg.payload == 1)||(msg.payload.toString().toLowerCase() === &#x22;on&#x22;)) {
+                      io.digitalWrite(node.pin, 1);
+                  }
+                  if ((msg.payload == false)||(msg.payload == 0)||(msg.payload.toString().toLowerCase() === &#x22;off&#x22;)) {
+                      io.digitalWrite(node.pin, 0);
+                  }
+                }
+                else if (state === &#x27;PWM&#x27;) {
+                  try{io.pinMode(node.pin, io.MODES[state]);}catch(exp){ console.log(exp); }
+                  msg.payload = msg.payload * 1;
+                  if ((msg.payload &#x3e;= 0) &#x26;&#x26; (msg.payload &#x3c;= 255)) {
+                      //console.log(msg.payload, node.pin);
+                      io.analogWrite(node.pin, msg.payload);
+                  }
+                }
+                else if (state === &#x27;SERVO&#x27;) {
+                  try{io.pinMode(node.pin, io.MODES[state]);}catch(exp){ console.log(exp); }
+                  msg.payload = msg.payload * 1;
+                  if ((msg.payload &#x3e;= 0) &#x26;&#x26; (msg.payload &#x3c;= 180)) {
+                      //console.log(msg.payload, node.pin);
+                      io.servoWrite(node.pin, msg.payload);
+                  }
+                }
+                else if(node.state === &#x27;I2C_READ_REQUEST&#x27;){
+                  var register = parseInt(msg.i2cRegister, 10) || parseInt(node.i2cRegister, 10);
+                  var i2cAddress = parseInt(msg.i2cAddress, 10) || parseInt(node.i2cAddress, 10);
+                  var numBytes = parseInt(msg.payload, 10);
+                  if(io.i2cReadOnce &#x26;&#x26; i2cAddress &#x26;&#x26; numBytes){
+                    if(register){
+                      io.i2cReadOnce(i2cAddress, register, numBytes, function(data){ ...</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.node-red-contrib-gpio.nodebotNode" id="apidoc.element.node-red-contrib-gpio.nodebotNode">
+        function <span class="apidocSignatureSpan">node-red-contrib-gpio.</span>nodebotNode
+        <span class="apidocSignatureSpan">(RED)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function createNode(RED){
+
+
+  function start(node){
+    if(node.io){
+      node.io.on(&#x27;connect&#x27;, function(){
+        node.emit(&#x27;networkReady&#x27;, node.io);
+      });
+      node.board = new five.Board({io: node.io, id: node.id, repl: false, timeout: 2e4});
+      node.board.on(&#x27;ready&#x27;, function(){
+        if (RED.settings.verbose) { node.log(&#x27;io ready&#x27;); }
+        process.nextTick(function() {
+          node.emit(&#x27;ioready&#x27;, node.io);
+        });
+      });
+
+      node.board.on(&#x27;error&#x27;, node.error.bind(node));
+      node.on(&#x27;close&#x27;, function(done) {
+
+        if (RED.settings.verbose) { node.log(&#x27;closing nodebot&#x27;); }
+        try{
+
+          if(node.tcpServer){
+            try{
+              node.tcpServer.close();
+            }
+            catch(exp){
+              node.error(exp);
+            }
+          }
+
+          if(node.io &#x26;&#x26; node.io.close){
+            node.io.close();
+          }
+          else if(node.io &#x26;&#x26; node.io.sp){
+            if(node.io.sp.close){
+              node.io.sp.close();
+            }else if(node.io.sp.end){
+              node.io.sp.end();
+            }
+          }
+
+          if(node.client &#x26;&#x26; node.client.stop){
+            node.client.stop();
+          }
+          if(node.client &#x26;&#x26; node.client.close){
+            node.client.close();
+          }
+
+          var cachedBoards = [];
+          five.Board.cache.forEach(function(){
+            five.Board.cache.pop();
+          });
+
+          cachedBoards.forEach(function(board){
+            if(board !== node.board){
+              five.Board.cache.push(board);
+            }
+          });
+
+          //try and cleanup board
+          node.board.register.forEach(function(component){
+            try{
+              if(component.stop){
+                component.stop();
+              }
+              else if(component.state &#x26;&#x26; component.state.intervalId){
+                clearInterval(component.state.intervalId);
+              }
+              else if(component.state &#x26;&#x26; component.state.interval){
+                clearInterval(component.state.interval);
+              }
+              component.io = null;
+              component.board = null;
+            }catch(compE){
+              console.log(&#x27;error trying to cleanup component&#x27;, compE);
+            }
+
+          });
+          node.board.io = null;
+
+          done();
+          if (RED.settings.verbose) { node.log(&#x22;port closed&#x22;); }
+        }catch(exp){
+          console.log(&#x27;error closing&#x27;, exp);
+          done();
+        }
+      });
+
+    }else{
+      node.emit(&#x27;ioError&#x27;, &#x27;invalid IO class&#x27;);
+    }
+  }
+
+  function nodebotNode(n) {
+    RED.nodes.createNode(this,n);
+    var node = this;
+
+    var boardModule, sp, VirtualSerialPort, client;
+    try{
+      boardModule = require(n.boardType);
+    }catch(exp){
+      node.log(&#x27;error loading io class&#x27;, n.boardType, exp);
+      process.nextTick(function() {
+        node.emit(&#x27;ioError&#x27;, exp);
+      });
+      return;
+    }
+
+    if(n.boardType === &#x27;firmata&#x27;){
+      if(n.connectionType === &#x27;local&#x27;){
+        try{
+          node.io = new firmata.Board(n.serialportName, { serialport:{baudRate:57600, bufferSize:256, lock: false} });
+          start(node);
+        }catch(exp){
+          process.nextTick(function() {
+            node.emit(&#x27;ioError&#x27;, exp);
+          });
+        }
+      }
+      else if(n.connectionType === &#x27;mqtt&#x27;){
+        try{
+          var mqtt = require(&#x27;mqtt&#x27;);
+          VirtualSerialPort = require(&#x27;mqtt-serial&#x27;).SerialPort;
+
+          client = mqtt.connect(n.mqttServer,
+          {username: n.username, password: n.password});
+          client.on(&#x27;error&#x27;, function(err){
+            node.warn(err);
+          });
+
+          sp = new VirtualSerialPort({
+            client: client,
+            transmitTopic: n.pubTopic,
+            receiveTopic: n.subTopic
+          });
+
+          node.io = new firmata.Board(sp, {samplingInterval: 300, reportVersionTimeout: 15000});
+          start(node);
+        }catch(exp){
+          console.log(&#x27;error initializing mqtt firmata&#x27;, exp);
+          process.nextTick(function() {
+            node.emit(&#x27;ioError&#x27;, exp);
+          });
+        } ...</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.node-red-contrib-gpio.toString" id="apidoc.element.node-red-contrib-gpio.toString">
+        function <span class="apidocSignatureSpan">node-red-contrib-gpio.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">toString = function () {
+    return text;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+
+            node.on(&#x27;input&#x27;, function(msg) {
+try{
+  var state = msg.state || node.state;
+  var io = node.nodebot.io;
+  if (state === &#x27;OUTPUT&#x27;) {
+    try{io.pinMode(node.pin, io.MODES[state]);}catch(exp){ console.log(exp); }
+    if ((msg.payload == true)||(msg.payload == 1)||(msg.payload.<span class="apidocCodeKeywordSpan">toString</span>().toLowerCase
+() === &#x22;on&#x22;)) {
+        io.digitalWrite(node.pin, 1);
+    }
+    if ((msg.payload == false)||(msg.payload == 0)||(msg.payload.toString().toLowerCase() === &#x22;off&#x22;)) {
+        io.digitalWrite(node.pin, 0);
+    }
+  }
+  else if (state === &#x27;PWM&#x27;) {
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.node-red-contrib-gpio.nodebotNode" id="apidoc.module.node-red-contrib-gpio.nodebotNode">module node-red-contrib-gpio.nodebotNode</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.node-red-contrib-gpio.nodebotNode.nodebotNode" id="apidoc.element.node-red-contrib-gpio.nodebotNode.nodebotNode">
+        function <span class="apidocSignatureSpan">node-red-contrib-gpio.</span>nodebotNode
+        <span class="apidocSignatureSpan">(RED)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function createNode(RED){
+
+
+  function start(node){
+    if(node.io){
+      node.io.on(&#x27;connect&#x27;, function(){
+        node.emit(&#x27;networkReady&#x27;, node.io);
+      });
+      node.board = new five.Board({io: node.io, id: node.id, repl: false, timeout: 2e4});
+      node.board.on(&#x27;ready&#x27;, function(){
+        if (RED.settings.verbose) { node.log(&#x27;io ready&#x27;); }
+        process.nextTick(function() {
+          node.emit(&#x27;ioready&#x27;, node.io);
+        });
+      });
+
+      node.board.on(&#x27;error&#x27;, node.error.bind(node));
+      node.on(&#x27;close&#x27;, function(done) {
+
+        if (RED.settings.verbose) { node.log(&#x27;closing nodebot&#x27;); }
+        try{
+
+          if(node.tcpServer){
+            try{
+              node.tcpServer.close();
+            }
+            catch(exp){
+              node.error(exp);
+            }
+          }
+
+          if(node.io &#x26;&#x26; node.io.close){
+            node.io.close();
+          }
+          else if(node.io &#x26;&#x26; node.io.sp){
+            if(node.io.sp.close){
+              node.io.sp.close();
+            }else if(node.io.sp.end){
+              node.io.sp.end();
+            }
+          }
+
+          if(node.client &#x26;&#x26; node.client.stop){
+            node.client.stop();
+          }
+          if(node.client &#x26;&#x26; node.client.close){
+            node.client.close();
+          }
+
+          var cachedBoards = [];
+          five.Board.cache.forEach(function(){
+            five.Board.cache.pop();
+          });
+
+          cachedBoards.forEach(function(board){
+            if(board !== node.board){
+              five.Board.cache.push(board);
+            }
+          });
+
+          //try and cleanup board
+          node.board.register.forEach(function(component){
+            try{
+              if(component.stop){
+                component.stop();
+              }
+              else if(component.state &#x26;&#x26; component.state.intervalId){
+                clearInterval(component.state.intervalId);
+              }
+              else if(component.state &#x26;&#x26; component.state.interval){
+                clearInterval(component.state.interval);
+              }
+              component.io = null;
+              component.board = null;
+            }catch(compE){
+              console.log(&#x27;error trying to cleanup component&#x27;, compE);
+            }
+
+          });
+          node.board.io = null;
+
+          done();
+          if (RED.settings.verbose) { node.log(&#x22;port closed&#x22;); }
+        }catch(exp){
+          console.log(&#x27;error closing&#x27;, exp);
+          done();
+        }
+      });
+
+    }else{
+      node.emit(&#x27;ioError&#x27;, &#x27;invalid IO class&#x27;);
+    }
+  }
+
+  function nodebotNode(n) {
+    RED.nodes.createNode(this,n);
+    var node = this;
+
+    var boardModule, sp, VirtualSerialPort, client;
+    try{
+      boardModule = require(n.boardType);
+    }catch(exp){
+      node.log(&#x27;error loading io class&#x27;, n.boardType, exp);
+      process.nextTick(function() {
+        node.emit(&#x27;ioError&#x27;, exp);
+      });
+      return;
+    }
+
+    if(n.boardType === &#x27;firmata&#x27;){
+      if(n.connectionType === &#x27;local&#x27;){
+        try{
+          node.io = new firmata.Board(n.serialportName, { serialport:{baudRate:57600, bufferSize:256, lock: false} });
+          start(node);
+        }catch(exp){
+          process.nextTick(function() {
+            node.emit(&#x27;ioError&#x27;, exp);
+          });
+        }
+      }
+      else if(n.connectionType === &#x27;mqtt&#x27;){
+        try{
+          var mqtt = require(&#x27;mqtt&#x27;);
+          VirtualSerialPort = require(&#x27;mqtt-serial&#x27;).SerialPort;
+
+          client = mqtt.connect(n.mqttServer,
+          {username: n.username, password: n.password});
+          client.on(&#x27;error&#x27;, function(err){
+            node.warn(err);
+          });
+
+          sp = new VirtualSerialPort({
+            client: client,
+            transmitTopic: n.pubTopic,
+            receiveTopic: n.subTopic
+          });
+
+          node.io = new firmata.Board(sp, {samplingInterval: 300, reportVersionTimeout: 15000});
+          start(node);
+        }catch(exp){
+          console.log(&#x27;error initializing mqtt firmata&#x27;, exp);
+          process.nextTick(function() {
+            node.emit(&#x27;ioError&#x27;, exp);
+          });
+        } ...</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.node-red-contrib-gpio.toString" id="apidoc.module.node-red-contrib-gpio.toString">module node-red-contrib-gpio.toString</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.node-red-contrib-gpio.toString.toString" id="apidoc.element.node-red-contrib-gpio.toString.toString">
+        function <span class="apidocSignatureSpan">node-red-contrib-gpio.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function toString() { [native code] }</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+
+            node.on(&#x27;input&#x27;, function(msg) {
+try{
+  var state = msg.state || node.state;
+  var io = node.nodebot.io;
+  if (state === &#x27;OUTPUT&#x27;) {
+    try{io.pinMode(node.pin, io.MODES[state]);}catch(exp){ console.log(exp); }
+    if ((msg.payload == true)||(msg.payload == 1)||(msg.payload.<span class="apidocCodeKeywordSpan">toString</span>().toLowerCase
+() === &#x22;on&#x22;)) {
+        io.digitalWrite(node.pin, 1);
+    }
+    if ((msg.payload == false)||(msg.payload == 0)||(msg.payload.toString().toLowerCase() === &#x22;off&#x22;)) {
+        io.digitalWrite(node.pin, 0);
+    }
+  }
+  else if (state === &#x27;PWM&#x27;) {
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
