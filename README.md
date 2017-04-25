@@ -1,4 +1,7 @@
-# api documentation for  [node-red-contrib-gpio (v0.9.2)](https://github.com/monteslu/node-red-contrib-gpio)  [![npm package](https://img.shields.io/npm/v/npmdoc-node-red-contrib-gpio.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-node-red-contrib-gpio) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-node-red-contrib-gpio.svg)](https://travis-ci.org/npmdoc/node-npmdoc-node-red-contrib-gpio)
+# npmdoc-node-red-contrib-gpio
+
+#### basic api documentation for  [node-red-contrib-gpio (v0.9.2)](https://github.com/monteslu/node-red-contrib-gpio)  [![npm package](https://img.shields.io/npm/v/npmdoc-node-red-contrib-gpio.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-node-red-contrib-gpio) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-node-red-contrib-gpio.svg)](https://travis-ci.org/npmdoc/node-npmdoc-node-red-contrib-gpio)
+
 #### A set of node-red nodes for using johnny-five and IO plugins
 
 [![NPM](https://nodei.co/npm/node-red-contrib-gpio.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/node-red-contrib-gpio)
@@ -80,7 +83,8 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "version": "0.9.2"
+    "version": "0.9.2",
+    "bin": {}
 }
 ```
 
